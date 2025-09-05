@@ -38,9 +38,11 @@
     .badge{font-size:.75rem; padding:.25rem .5rem; border:1px solid rgba(255,255,255,.2); border-radius:999px; background:var(--glass)}
 
     /* Hero */
-    .hero{position:relative; padding-top:110px; padding-bottom:40px}
+    .hero{position:relative; padding-top:110px; padding-bottom:40px; overflow:hidden}
     canvas#bg{position:fixed; inset:0; z-index:-1}
-    .hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:30px; align-items:center}
+    .wave{position:absolute; bottom:0; left:0; width:100%; height:140px; z-index:1;}
+    .wave svg{width:100%; height:100%}
+    .hero-grid{display:grid; grid-template-columns:1.2fr .8fr; gap:30px; align-items:center; position:relative; z-index:2}
     @media (max-width: 900px){ .hero-grid{grid-template-columns:1fr; gap:20px} }
 
     .title{font-family:"Space Grotesk"; font-weight:900; line-height:1.05; font-size:clamp(2.2rem, 5vw, 3.8rem); letter-spacing:.3px}
@@ -49,64 +51,26 @@
     .subtitle{font-size:clamp(1rem, 2.2vw, 1.2rem); color:var(--muted)}
     .chips{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 24px}
 
+    /* Ripple effect */
+    .ripple{position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:0}
+    .circle{position:absolute; border-radius:50%; background:rgba(124,255,203,.25); transform:scale(0); animation:ripple 0.9s linear;}
+    @keyframes ripple{to{transform:scale(12); opacity:0;}}
+
     /* Sections */
-    section{padding:60px 0}
+    section{padding:60px 0; position:relative; z-index:2}
     .card{background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.14); border-radius:20px; box-shadow:var(--shadow)}
     .grid{display:grid; gap:18px}
     .grid-3{grid-template-columns:repeat(3, 1fr)}
     .grid-2{grid-template-columns:repeat(2, 1fr)}
     @media (max-width:900px){ .grid-3{grid-template-columns:1fr} .grid-2{grid-template-columns:1fr} }
 
-    /* Project cards */
-    .project{position:relative; padding:18px; overflow:hidden}
-    .project h3{margin:4px 0 6px}
-    .project p{color:var(--muted); margin:0 0 10px}
-    .project .meta{display:flex; gap:8px; flex-wrap:wrap}
-    .project .shine{position:absolute; inset:0; background:radial-gradient(600px 200px at var(--x,50%) var(--y,50%), rgba(255,255,255,.15), transparent 40%); pointer-events:none}
-
-    /* Skills */
-    .skill{padding:14px 16px}
-    .bar{height:10px; background:rgba(255,255,255,.14); border-radius:999px; overflow:hidden}
-    .bar > i{display:block; height:100%; width:0; background:linear-gradient(90deg, var(--brand), var(--pink)); border-radius:999px}
-
-    /* Contact */
-    .contact{display:flex; gap:18px; flex-wrap:wrap}
-    .link-card{display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:16px; border:1px solid rgba(255,255,255,.14); background:var(--glass); cursor:pointer}
-    .link-card:hover{background:var(--glass-2)}
-
     /* Footer */
-    footer{padding:50px 0 80px; color:var(--muted); text-align:center}
-
-    /* Nice scrolling */
-    html{scroll-behavior:smooth}
-
-    /* Floating cursor ring */
-    .ring{position:fixed; width:28px; height:28px; border:2px solid rgba(255,255,255,.5); border-radius:50%; pointer-events:none; mix-blend-mode:exclusion; z-index:1000; transition:transform .1s ease, width .15s, height .15s, opacity .2s}
-
-    /* Glow separator */
-    .sep{height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent); margin:22px 0}
-
-    /* Utility */
-    .flex{display:flex; align-items:center; gap:10px}
-    .center{display:grid; place-items:center}
-    .right{justify-content:flex-end}
-    .mt-1{margin-top:6px}
-    .mt-2{margin-top:12px}
-    .mt-3{margin-top:18px}
-    .mt-4{margin-top:26px}
-    .tag{font-size:.8rem; opacity:.8}
-
-    /* Dark mode toggle */
-    .toggle{position:relative; width:56px; height:30px; border-radius:999px; background:#0e1220; border:1px solid rgba(255,255,255,.18)}
-    .toggle i{position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:linear-gradient(180deg,#fff,#cfd8ff); box-shadow:0 6px 18px rgba(0,0,0,.35); transition:transform .25s ease}
-    body.light{--bg:#F7FAFF; --bg-soft:#ffffff; --text:#0A0D13; --muted:#3f4b63}
-    body.light{background:linear-gradient(180deg,#F7FAFF 0%, #E9F1FF 100%)}
-    body.light .nav, body.light .card, body.light .btn, body.light .link-card{background:rgba(255,255,255,.75)}
-    body.light .nav, body.light .card, body.light .btn, body.light .link-card{border-color:rgba(0,0,0,.08)}
+    footer{padding:50px 0 80px; color:var(--muted); text-align:center; position:relative; z-index:2}
   </style>
 </head>
 <body>
   <canvas id="bg"></canvas>
+  <div class="ripple" id="ripple"></div>
   <div class="ring" id="ring"></div>
 
   <header>
@@ -117,10 +81,6 @@
         <a href="#projects">Projects</a>
         <a href="#skills">Skills</a>
         <a href="#contact">Contact</a>
-        <button class="btn" id="themeBtn" aria-label="Toggle theme">
-          <div class="toggle" aria-hidden="true"><i id="knob"></i></div>
-          <span class="tag">Light</span>
-        </button>
       </nav>
     </div>
   </header>
@@ -128,263 +88,38 @@
   <main class="container hero">
     <div class="hero-grid">
       <div>
-        <div class="badge">⚡️ Khatra Web Developer • Frontend & Motion</div>
-        <h1 class="title mt-2">
-          <span class="stroke" data-text="Aniki Sathy">Aniki Sathy</span><br>
-          म <span class="stroke" data-text="Yunik Shrestha">Yunik Shrestha</span>,
-          <span id="type"></span>
-        </h1>
-        <p class="subtitle mt-3">“dami, babal, khatra” effects सहित modern UI/UX — fast performance, clean code, and pixel-perfect animations. Kathmandu बाट global impact ✈️</p>
-        <div class="chips">
-          <span class="badge">GSAP‑like Micro‑interactions</span>
-          <span class="badge">Glassmorphism</span>
-          <span class="badge">Parallax</span>
-          <span class="badge">3D Tilt</span>
-        </div>
-        <div class="flex mt-2">
-          <a class="btn" href="#projects">🚀 View Projects</a>
-          <a class="btn" href="#contact">📬 Hire Me</a>
-        </div>
+        <h1 class="title mt-2">म <span class="stroke" data-text="Yunik Shrestha">Yunik Shrestha</span></h1>
+        <p class="subtitle mt-3">Khatra pani effect सहित modern website developer!</p>
       </div>
-
-      <div class="card center" style="min-height:320px; position:relative; overflow:hidden">
-        <svg viewBox="0 0 600 600" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" style="position:absolute; inset:0; filter:drop-shadow(0 30px 60px rgba(0,0,0,.45))">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1">
-              <stop offset="0%" stop-color="#7CFFCB"/>
-              <stop offset="100%" stop-color="#3A86FF"/>
-            </linearGradient>
-          </defs>
-          <path fill="url(#g1)">
-            <animate attributeName="d" dur="12s" repeatCount="indefinite" values="
-              M0,300 C120,260 180,160 300,160 C420,160 480,260 600,300 L600,600 L0,600 Z;
-              M0,300 C120,340 200,220 300,220 C420,220 480,360 600,300 L600,600 L0,600 Z;
-              M0,300 C120,260 180,160 300,160 C420,160 480,260 600,300 L600,600 L0,600 Z
-            "/>
-          </path>
-        </svg>
-        <div class="center" style="position:relative; z-index:2; text-align:center; padding:30px">
-          <h3 style="margin:0; font-family:'Space Grotesk'; font-size:1.6rem">Building Smooth, Fast & Fancy Web</h3>
-          <p class="tag">Custom animations • Performance first • Clean architecture</p>
-        </div>
-      </div>
+      <div class="card center" style="min-height:320px">🔥 Effects showcase</div>
+    </div>
+    <div class="wave">
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0V46.29c47.79,22,103.59,29,158,17,70-15,136-59,207-57,71,2,136,52,207,61,74,9,146-30,218-44,73-14,142,14,212,29,66,15,131,15,198-3V0Z" opacity=".25" fill="#3A86FF">
+          <animate attributeName="d" dur="10s" repeatCount="indefinite" values="
+            M0,0V46.29c47.79,22,103.59,29,158,17,70-15,136-59,207-57,71,2,136,52,207,61,74,9,146-30,218-44,73-14,142,14,212,29,66,15,131,15,198-3V0Z;
+            M0,0V46.29c57.79,32,123.59,39,178,27,70-15,136-59,207-57,71,2,126,42,197,51,74,9,146-30,218-44,83-14,152,24,222,39,66,15,141,25,208,7V0Z;
+            M0,0V46.29c47.79,22,103.59,29,158,17,70-15,136-59,207-57,71,2,136,52,207,61,74,9,146-30,218-44,73-14,142,14,212,29,66,15,131,15,198-3V0Z
+          "/>
+        </path>
+      </svg>
     </div>
   </main>
 
-  <section id="about">
-    <div class="container grid grid-2">
-      <div class="card" style="padding:24px">
-        <h2>About Me</h2>
-        <div class="sep"></div>
-        <p>Namaste 🙏, म Yunik — creative frontend engineer. I craft interactive websites with buttery‑smooth animations, scalable code and modern UX patterns. Goal: design मात्र होइन, real business impact.</p>
-        <ul>
-          <li>Focus: React, TypeScript, CSS architecture, motion design</li>
-          <li>Values: speed, accessibility, maintainability</li>
-          <li>Bonus: branding, micro‑copy, content strategy</li>
-        </ul>
-      </div>
-      <div class="card center" style="padding:24px; min-height:220px">
-        <div>
-          <div class="badge">Quick Stats</div>
-          <h3 class="mt-2">10+ Production Projects • 95+ Lighthouse Perf • <span style="white-space:nowrap"><span class="glow">#NoJitter</span> Animations</span></h3>
-          <p class="tag">Client love: “Babal smooth experience!”</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section id="projects">
-    <div class="container">
-      <h2>Featured Projects</h2>
-      <p class="tag">Hover / touch cards for khatra effects</p>
-      <div class="grid grid-3 mt-2">
-        <article class="card project tilt" tabindex="0">
-          <div class="shine"></div>
-          <div class="badge">Next.js • Motion</div>
-          <h3>SkyDash</h3>
-          <p>High‑performance landing with hero animations, smart lazy‑loading and split‑route transitions.</p>
-          <div class="meta">
-            <span class="badge">SSR</span><span class="badge">A11y</span><span class="badge">SEO</span>
-          </div>
-        </article>
-        <article class="card project tilt" tabindex="0">
-          <div class="shine"></div>
-          <div class="badge">React • Recharts</div>
-          <h3>TradePulse</h3>
-          <p>Real‑time dashboard: websockets, virtualized lists, and delightful micro‑interactions.</p>
-          <div class="meta">
-            <span class="badge">WebSocket</span><span class="badge">Virtualize</span><span class="badge">Dark/Light</span>
-          </div>
-        </article>
-        <article class="card project tilt" tabindex="0">
-          <div class="shine"></div>
-          <div class="badge">Vanilla • CSS Art</div>
-          <h3>Nepal Trails</h3>
-          <p>Tourism micro‑site with parallax scenes, scroll‑hint nav and offline‑first PWA.</p>
-          <div class="meta">
-            <span class="badge">PWA</span><span class="badge">Parallax</span><span class="badge">i18n</span>
-          </div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <section id="skills">
-    <div class="container grid grid-2">
-      <div class="card" style="padding:20px 20px 26px">
-        <h2>Skills</h2>
-        <div class="mt-2">
-          <div class="skill"><div class="flex"><b>JavaScript / TypeScript</b><span class="tag">advanced</span></div><div class="bar"><i style="--w:92%"></i></div></div>
-          <div class="skill"><div class="flex"><b>React / Next.js</b><span class="tag">advanced</span></div><div class="bar"><i style="--w:90%"></i></div></div>
-          <div class="skill"><div class="flex"><b>CSS (Flex/Grid/Motion)</b><span class="tag">expert</span></div><div class="bar"><i style="--w:95%"></i></div></div>
-          <div class="skill"><div class="flex"><b>Node / API</b><span class="tag">intermediate</span></div><div class="bar"><i style="--w:70%"></i></div></div>
-          <div class="skill"><div class="flex"><b>Design Systems</b><span class="tag">advanced</span></div><div class="bar"><i style="--w:88%"></i></div></div>
-        </div>
-      </div>
-      <div class="card" style="padding:20px 20px 26px">
-        <h2>Highlights</h2>
-        <ul class="mt-2">
-          <li>Reusable animation utilities (no heavy libs)</li>
-          <li>Accessibility: semantic HTML, focus states, reduced motion</li>
-          <li>Performance budgets, image/asset strategies</li>
-          <li>Code review & mentoring</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section id="contact">
-    <div class="container">
-      <h2>Contact</h2>
-      <p class="tag">Work garna ready छ भने ping gar! 😎</p>
-      <div class="contact mt-2">
-        <button class="link-card" data-copy="yunik.dev@proton.me">📧 yunik.dev@proton.me</button>
-        <a class="link-card" href="#" onclick="alert('Demo link — replace with your GitHub URL!')">💻 GitHub</a>
-        <a class="link-card" href="#" onclick="alert('Demo link — replace with your LinkedIn URL!')">🔗 LinkedIn</a>
-        <a class="link-card" href="#" onclick="alert('Demo link — replace with your Dribbble/Behance URL!')">🎨 Dribbble</a>
-      </div>
-    </div>
-  </section>
-
   <footer>
-    <div class="container">© <span id="year"></span> Yunik Shrestha • Built with ❤️, caffeine & khatra effects</div>
+    <div class="container">© <span id="year"></span> Yunik Shrestha • With pani effects 🌊</div>
   </footer>
 
   <script>
-    // ===== Canvas particles background (lightweight, performant) =====
-    const c = document.getElementById('bg');
-    const ctx = c.getContext('2d');
-    let w, h, dpr;
-    const DPR = () => (window.devicePixelRatio || 1);
-    const P = [];
-    function resize(){
-      w = c.width = innerWidth * DPR();
-      h = c.height = innerHeight * DPR();
-      c.style.width = innerWidth + 'px';
-      c.style.height = innerHeight + 'px';
-    }
-    window.addEventListener('resize', resize); resize();
-    for(let i=0;i<80;i++){
-      P.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2+0.3, vx:(Math.random()-.5)*0.35, vy:(Math.random()-.5)*0.35});
-    }
-    function tick(){
-      ctx.clearRect(0,0,w,h);
-      ctx.globalAlpha = .8; ctx.fillStyle = '#9ad7ff';
-      for(const p of P){
-        p.x+=p.vx; p.y+=p.vy;
-        if(p.x<0||p.x>w) p.vx*=-1;
-        if(p.y<0||p.y>h) p.vy*=-1;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
-      }
-      // Connect lines
-      ctx.globalAlpha = .14; ctx.strokeStyle = '#ffffff';
-      for(let i=0;i<P.length;i++){
-        for(let j=i+1;j<P.length;j++){
-          const a=P[i], b=P[j];
-          const dx=a.x-b.x, dy=a.y-b.y; const dist=dx*dx+dy*dy;
-          if(dist< (140*DPR())**2){ ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
-        }
-      }
-      requestAnimationFrame(tick);
-    } tick();
-
-    // ===== Typewriter =====
-    const typeEl = document.getElementById('type');
-    const roles = ['Web Developer', 'UI/UX Lover', 'Animation Geek', 'Problem Solver'];
-    let ri=0, ci=0, del=false;
-    function type(){
-      const word = roles[ri];
-      if(!del){ ci++; if(ci===word.length+1){ del=true; setTimeout(type, 900); return; } }
-      else { ci--; if(ci===0){ del=false; ri=(ri+1)%roles.length; } }
-      typeEl.textContent = word.slice(0,ci);
-      setTimeout(type, del? 45: 80);
-    } type();
-
-    // ===== Card tilt + shine =====
-    const tilts = [...document.querySelectorAll('.tilt')];
-    tilts.forEach(card=>{
-      card.addEventListener('pointermove', (e)=>{
-        const r = card.getBoundingClientRect();
-        const x = e.clientX - r.left, y = e.clientY - r.top;
-        const rx = (y/r.height - .5) * -8;
-        const ry = (x/r.width - .5) * 8;
-        card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-        card.style.transition = 'transform .05s linear';
-        card.style.willChange = 'transform';
-        card.style.boxShadow = '0 20px 50px rgba(0,0,0,.35)';
-        card.querySelector('.shine').style.setProperty('--x', `${x}px`);
-        card.querySelector('.shine').style.setProperty('--y', `${y}px`);
-      });
-      card.addEventListener('pointerleave', ()=>{
-        card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg)';
-        card.style.boxShadow = '';
-      });
-    });
-
-    // ===== Animate skill bars on view =====
-    const io = new IntersectionObserver((entries)=>{
-      entries.forEach(el=>{
-        if(el.isIntersecting){
-          el.target.querySelectorAll('.bar > i').forEach(i=>{
-            i.style.width = i.style.getPropertyValue('--w');
-            i.style.transition = 'width 900ms cubic-bezier(.2,.8,.2,1)';
-          });
-        }
-      })
-    }, {threshold:.4});
-    document.querySelectorAll('#skills .card').forEach(c=>io.observe(c));
-
-    // ===== Copy email =====
-    document.querySelectorAll('[data-copy]').forEach(btn=>{
-      btn.addEventListener('click', async ()=>{
-        const text = btn.getAttribute('data-copy');
-        try{ await navigator.clipboard.writeText(text); btn.textContent = '✅ Copied!'; setTimeout(()=>btn.textContent='📧 '+text, 1200); }
-        catch{ alert(text); }
-      });
-    });
-
-    // ===== Cursor ring =====
-    const ring = document.getElementById('ring');
-    window.addEventListener('pointermove', (e)=>{
-      ring.style.transform = `translate(${e.clientX-14}px, ${e.clientY-14}px)`;
-    });
-    document.querySelectorAll('a,button,.tilt').forEach(el=>{
-      el.addEventListener('pointerenter', ()=>{ring.style.width='40px'; ring.style.height='40px';});
-      el.addEventListener('pointerleave', ()=>{ring.style.width='28px'; ring.style.height='28px';});
-    });
-
-    // ===== Theme toggle =====
-    const themeBtn = document.getElementById('themeBtn');
-    const knob = document.getElementById('knob');
-    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
-    if(localStorage.theme==='light' || (!('theme' in localStorage) && prefersLight)) document.body.classList.add('light');
-    function syncToggle(){ knob.style.transform = document.body.classList.contains('light')? 'translateX(26px)' : 'translateX(0)';
-      themeBtn.querySelector('span').textContent = document.body.classList.contains('light')? 'Dark' : 'Light'; }
-    syncToggle();
-    themeBtn.addEventListener('click', ()=>{
-      document.body.classList.toggle('light');
-      localStorage.theme = document.body.classList.contains('light')? 'light' : 'dark';
-      syncToggle();
+    // Ripple effect
+    document.addEventListener('click', function(e){
+      const ripple = document.getElementById('ripple');
+      const circle = document.createElement('span');
+      circle.classList.add('circle');
+      circle.style.left = e.clientX + 'px';
+      circle.style.top = e.clientY + 'px';
+      ripple.appendChild(circle);
+      setTimeout(()=>circle.remove(), 900);
     });
 
     // Footer year
